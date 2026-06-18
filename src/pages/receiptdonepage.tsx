@@ -1,33 +1,35 @@
-// pages/receiptdonepage.tsx
 import { Header } from "@/components/common/Header";
 import { BottomBar } from "@/components/common/BottomBar";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
-// TODO: 백엔드 연동 시 실제 데이터로 교체
-const MOCK = {
-    storeName: "성신 카페",
-    visitCount: 3, // n번째 방문
-};
+interface StoreInfo {
+    storeId: number;
+    storeName: string;
+    transactionDate: string;
+    visitCount: number;
+}
 
-function formatToday(): string {
-    const now = new Date();
-    return `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+function formatDate(iso?: string): string {
+    if (!iso) {
+        const now = new Date();
+        return `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+    }
+    const [y, m, d] = iso.split("-");
+    return `${y}년 ${Number(m)}월 ${Number(d)}일`;
 }
 
 export const ReceiptDonePage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const store = (location.state as { store?: StoreInfo } | null)?.store;
 
-    const goDecorate = () => {
-        // 방 꾸미러 가기 → 홈
-        navigate("/", { replace: true });
-    };
+    const goDecorate = () => navigate("/", { replace: true });
 
     return (
         <div className="flex h-dvh flex-col bg-main">
             <Header />
 
             <main className="flex flex-1 flex-col justify-center px-6">
-                {/* 스캔 성공 카드 */}
                 <div className="w-full rounded-3xl bg-white px-6 py-9 text-center shadow-sm">
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 px-3 py-1 text-xs font-semibold text-point-khaki">
                         <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden>
@@ -40,16 +42,17 @@ export const ReceiptDonePage = () => {
                         Receipt Scanned Successfully
                     </span>
 
-                    <h1 className="mt-4 text-3xl font-bold text-light-brown">{MOCK.storeName}</h1>
+                    <h1 className="mt-4 text-3xl font-bold text-light-brown">
+                        {store?.storeName ?? "-"}
+                    </h1>
 
                     <p className="mt-4 text-sm text-grey">
-                        {formatToday()}
+                        {formatDate(store?.transactionDate)}
                         <span className="mx-1.5 text-grey/50">·</span>
-                        {MOCK.visitCount}번째 방문
+                        {store?.visitCount ?? 0}번째 방문
                     </p>
                 </div>
 
-                {/* 방 꾸미러 가기 버튼 */}
                 <button
                     onClick={goDecorate}
                     className="mt-8 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-mint text-base font-semibold text-white transition-transform active:scale-[0.99]"
