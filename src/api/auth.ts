@@ -61,5 +61,9 @@ export const login = async (body: LoginRequest): Promise<LoginResponse> => {
     throw new Error(json?.message ?? "로그인에 실패했습니다.");
   }
 
+  localStorage.setItem("accessToken", json.data.accessToken);
+localStorage.setItem("refreshToken", json.data.refreshToken);
+
+
   return json;
 };
