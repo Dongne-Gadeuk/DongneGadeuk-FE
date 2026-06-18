@@ -54,9 +54,13 @@ export const ReceiptResultPage = () => {
     const retake = () => navigate("/receipt", { replace: true });
 
     const complete = () => {
-        // TODO: 완료 시 이동할 곳에 맞게 수정 (예: 홈, 목록 등)
-        navigate("/");
-    };
+         const visitCount: number = 3; // TODO: 실제 응답값으로 교체
+        if (visitCount === 1 || visitCount === 5) {
+            navigate("/receipt/complete", { replace: true });
+        } else {
+            navigate("/receipt/done", { replace: true });
+        }
+};
 
     return (
         <div className="flex h-dvh flex-col bg-main">
