@@ -8,10 +8,11 @@ import { MapPage } from "../pages/map";
 import { CollectionPage } from "../pages/collection";
 import { SignupPage } from "../pages/signup";
 import { LoginPage } from "../pages/login";
+import { ReceiptCompletePage } from "../pages/receiptcompletepage";
 
 import { RequireAuth } from "../routes/RequireAuth";
 import { OnboardingPage } from "../pages/onboarding";
-
+import { ReceiptDonePage } from "../pages/receiptdonepage";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -26,6 +27,8 @@ export const router = createBrowserRouter([
               { index: true, element: <HomePage /> },
               { path: "receipt", element: <ReceiptPage /> },
               { path: "receipt/result", element: <ReceiptResultPage /> },
+              { path: "receipt/complete", element: <ReceiptCompletePage /> },
+              { path: "receipt/done", element: <ReceiptDonePage /> },
               { path: "map", element: <MapPage /> },
               { path: "collection", element: <CollectionPage /> },
             ],
