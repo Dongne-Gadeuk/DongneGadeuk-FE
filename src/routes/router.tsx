@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { BaseLayout } from "../layouts/BaseLayout";
 import { AppLayout } from "../layouts/AppLayout";
 import { HomePage } from "../pages/home";
-import { ReceiptPage } from "../pages/receipt";
+import { ReceiptPage } from "../pages/receiptPage";
 import { MapPage } from "../pages/map";
 import { CollectionPage } from "../pages/collection";
 
