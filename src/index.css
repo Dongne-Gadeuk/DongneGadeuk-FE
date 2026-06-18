@@ -4,13 +4,17 @@
   --header-height: 80px;
   --bottom-bar-height: 90px;
 
-  --color-main: #FFFBEF;
-  --color-primary: #291A00;
-  --color-sub-black: #9D968C;
+  --color-background: #F7F2F0;
+  --color-light-brown: #291A00;
+  --color-brown: #544541;
+  
+  --color-point-khaki: #6E7A66;
+  --color-mint: #8A9A86;
+  --color-red: #BA1A1A;
 
-  --color-field: #EAE9E6;
-  --color-red: #FF7373;
-  --color-background: #FFFFFF;
+  --color-point-blue: #4A636A;
+  --color-grey: #7F7F7F;
+  
 }
 
 @font-face {

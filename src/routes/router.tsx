@@ -1,23 +1,29 @@
 import { createBrowserRouter } from "react-router-dom";
-import { AppLayout } from "../layouts/AppLayout"; 
+import { BaseLayout } from "../layouts/BaseLayout";
+import { AppLayout } from "../layouts/AppLayout";
+import { HomePage } from "../pages/home";
+import { ReceiptPage } from "../pages/receipt";
+import { MapPage } from "../pages/map";
+import { CollectionPage } from "../pages/collection";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <AppLayout />,
+    element: <BaseLayout />,
     children: [
       {
-        index: true,
-        element: (
-          <div className="flex min-h-screen items-center justify-center font-bold">
-            홈 화면 (기본 세팅 완료!)
-          </div>
-        ),
+        element: <AppLayout />,
+        children: [
+          { index: true, element: <HomePage /> },
+          { path: "receipt", element: <ReceiptPage /> },
+          { path: "map", element: <MapPage /> },
+          { path: "collection", element: <CollectionPage /> },
+          // {
+          //   path: "login",
+          //   element: <LoginPage />,
+          // },
+        ],
       },
-      // {
-      //   path: "login",
-      //   element: <LoginPage />,
-      // }, // 앞으로 추가할 페이지들은 여기에 이런 식으로 한 줄씩 얹으시면 됩니다.
     ],
   },
 ]);
