@@ -1,39 +1,130 @@
-// pages/receiptcompletepage/index.tsx (파일명/경로는 프로젝트 컨벤션에 맞게)
 import { Header } from "@/components/common/Header";
 import { BottomBar } from "@/components/common/BottomBar";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { apiFetch } from "@/api/client";
 
+interface ReceiptDto {
+    businessNumber: string;
+    storeName: string;
+    storeAddress: string;
+    transactionDate: string;
+    totalAmount: number;
+}
+interface StoreInfo {
+    storeId: number;
+    storeName: string;
+    transactionDate: string;
+    visitCount: number;
+}
+interface RewardItem {
+    itemId: number;
+    name: string;
+    imageUrl: string;
+}
+interface ScanResult {
+    type: "ITEM_CREATE" | "VISIT_ONLY";
+    store: StoreInfo;
+    item: RewardItem | null;
+}
 
-
-// TODO: 백엔드 연동 시 실제 데이터로 교체
-const MOCK = {
-    storeName: "성신 카페",
-    visitCount: 3,
-    itemName: "빈티지 에스프레소 머신",
-    // 실제로는 백엔드가 내려주는 이미지 URL
-  itemImage: "https://placehold.co/300x300?text=Item",
-};
-
-function formatToday(): string {
-    const now = new Date();
-    return `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+function formatDate(iso?: string): string {
+    if (!iso) return "";
+    const [y, m, d] = iso.split("-");
+    return `${y}년 ${Number(m)}월 ${Number(d)}일`;
 }
 
 export const ReceiptCompletePage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const receipt = (location.state as { data?: ReceiptDto } | null)?.data;
 
-    const placeInRoom = () => {
-    console.log("clicked"); // ← 콘솔에 찍히는지 확인
-    navigate("/", { replace: true });
-};
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [result, setResult] = useState<ScanResult | null>(null);
 
+    const ran = useRef(false);
+
+    useEffect(() => {
+        if (ran.current) return;
+        ran.current = true;
+
+        if (!receipt) {
+            setError("영수증 정보가 없어요. 다시 촬영해주세요.");
+            setLoading(false);
+            return;
+        }
+
+        (async () => {
+            try {
+                const res = await apiFetch("/api/receipt/receiveItem", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(receipt),
+                });
+                const json = await res.json();
+                if (!res.ok) {
+                    throw new Error(json?.message ?? "처리에 실패했어요.");
+                }
+
+                const scanResult = json.data as ScanResult;
+                setResult(scanResult);
+
+                if (scanResult.type === "VISIT_ONLY") {
+                    navigate("/receipt/done", {
+                        replace: true,
+                        state: { store: scanResult.store },
+                    });
+                    return;
+                }
+            } catch (e) {
+                setError(e instanceof Error ? e.message : "처리에 실패했어요.");
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [receipt]);
+
+    const placeInRoom = () => navigate("/", { replace: true });
+
+    if (loading) {
+        return (
+            <div className="flex h-dvh flex-col bg-main">
+                <Header />
+                <main className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+                    <div className="h-10 w-10 animate-spin rounded-full border-4 border-mint/30 border-t-mint" />
+                    <p className="text-sm text-grey">아이템을 받는 중...</p>
+                </main>
+                <BottomBar />
+            </div>
+        );
+    }
+
+    if (error || !result) {
+        return (
+            <div className="flex h-dvh flex-col bg-main">
+                <Header />
+                <main className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
+                    <p className="text-sm text-grey">{error ?? "결과를 불러오지 못했어요."}</p>
+                    <button
+                        onClick={() => navigate("/receipt", { replace: true })}
+                        className="h-12 rounded-2xl bg-mint px-6 text-base font-semibold text-white"
+                    >
+                        영수증 촬영하기
+                    </button>
+                </main>
+                <BottomBar />
+            </div>
+        );
+    }
+
+    const { store, item } = result;
     return (
         <div className="flex h-dvh flex-col bg-main">
             <Header />
 
             <main className="flex flex-1 flex-col overflow-y-auto">
                 <div className="flex flex-1 flex-col items-center px-6 pb-6 pt-5">
-                    {/* 스캔 성공 안내 카드 */}
                     <div className="w-full rounded-3xl bg-white px-5 py-5 text-center shadow-sm">
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/15 px-3 py-1 text-xs font-semibold text-point-khaki">
                             <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden>
@@ -46,28 +137,25 @@ export const ReceiptCompletePage = () => {
                             Receipt Scanned Successfully
                         </span>
 
-                        <h1 className="mt-3 text-xl font-bold text-light-brown">{MOCK.storeName}</h1>
+                        <h1 className="mt-3 text-xl font-bold text-light-brown">{store.storeName}</h1>
                         <p className="mt-1 text-sm text-grey">
-                            {formatToday()}
+                            {formatDate(store.transactionDate)}
                             <span className="mx-1.5 text-grey/50">·</span>
-                            {MOCK.visitCount}번째 방문
+                            {store.visitCount}번째 방문
                         </p>
                     </div>
 
-                    {/* 획득 아이템 이미지 */}
                     <div className="mt-6 flex aspect-square w-full max-w-[250px] items-center justify-center rounded-[2rem] background p-8 shadow-sm">
                         <img
-                            src={MOCK.itemImage}
-                            alt={MOCK.itemName}
+                            src={item!.imageUrl}
+                            alt={item!.name}
                             className="max-h-full max-w-full object-contain"
                         />
                     </div>
 
-                    {/* 아이템 정보 */}
-                    <h2 className="mt-6 text-2xl font-bold text-light-brown">{MOCK.itemName}</h2>
+                    <h2 className="mt-6 text-2xl font-bold text-light-brown">{item!.name}</h2>
                     <p className="mt-2 text-sm text-brown">나만의 방을 꾸밀 소중한 소품을 획득했습니다.</p>
 
-                    {/* 방에 배치하기 버튼 */}
                     <button
                         onClick={placeInRoom}
                         className="mt-auto flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-mint text-base font-semibold text-white transition-transform active:scale-[0.99]"

@@ -32,7 +32,6 @@ export const ReceiptResultPage = () => {
     const data = state?.data;
     const image = state?.image;
 
-    // 데이터 없이 직접 진입한 경우(새로고침 등) 촬영 화면으로 유도
     if (!data) {
         return (
             <div className="flex h-dvh flex-col bg-main">
@@ -54,13 +53,11 @@ export const ReceiptResultPage = () => {
     const retake = () => navigate("/receipt", { replace: true });
 
     const complete = () => {
-         const visitCount: number = 3; // TODO: 실제 응답값으로 교체
-        if (visitCount === 1 || visitCount === 5) {
-            navigate("/receipt/complete", { replace: true });
-        } else {
-            navigate("/receipt/done", { replace: true });
-        }
-};
+        navigate("/receipt/complete", {
+            replace: true,
+            state: { data },
+        });
+    };
 
     return (
         <div className="flex h-dvh flex-col bg-main">
@@ -97,7 +94,6 @@ export const ReceiptResultPage = () => {
                 </div>
             </main>
 
-            {/* 하단 고정 버튼 */}
             <div className="absolute bottom-20 left-1/2 z-10 flex w-full -translate-x-1/2 justify-center gap-3 px-6">
                 <button
                     onClick={retake}
