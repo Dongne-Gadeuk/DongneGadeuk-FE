@@ -8,8 +8,6 @@ import type { StoreMapCard } from "@/types/store";
 import mapBg from "@/assets/map/river.svg";
 import photoIcon from "@/assets/map/photo.svg";
 
-const USER_ID = 1;
-
 const categoryLabel: Record<string, string> = {
   CAFE: "카페",
   RESTAURANT: "식당",
@@ -27,8 +25,36 @@ export const MapPage = () => {
     let alive = true;
 
     const loadStores = async () => {
+      setLoading(true);
+      setError("");
+
       try {
-        const data = await fetchStoreMapCards(USER_ID);
+        const accessToken =
+          localStorage.getItem("accessToken") ||
+          localStorage.getItem("token") ||
+          localStorage.getItem("ACCESS_TOKEN");
+
+        if (!accessToken) {
+          navigate("/login", { replace: true });
+          return;
+        }
+
+        const userIdValue =
+          localStorage.getItem("userId") ||
+          localStorage.getItem("USER_ID") ||
+          localStorage.getItem("id");
+
+        if (!userIdValue) {
+          throw new Error("사용자 정보를 찾을 수 없어요. 다시 로그인해 주세요.");
+        }
+
+        const userId = Number(userIdValue);
+
+        if (Number.isNaN(userId)) {
+          throw new Error("사용자 정보가 올바르지 않아요. 다시 로그인해 주세요.");
+        }
+
+        const data = await fetchStoreMapCards(userId);
 
         if (alive) {
           setStores(data);
@@ -37,7 +63,11 @@ export const MapPage = () => {
         console.error(err);
 
         if (alive) {
-          setError("가게 정보를 불러오지 못했어요.");
+          if (err instanceof Error) {
+            setError(err.message);
+          } else {
+            setError("가게 정보를 불러오지 못했어요.");
+          }
         }
       } finally {
         if (alive) {
@@ -51,14 +81,13 @@ export const MapPage = () => {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="flex h-dvh flex-col bg-main">
       <Header />
 
       <main className="relative flex-1 overflow-hidden bg-[#eef2e4]">
-        {/* 피그마 지도 배경 */}
         <img
           src={mapBg}
           alt=""
@@ -72,11 +101,11 @@ export const MapPage = () => {
             </div>
           )}
 
-          {error && (
+          {!loading && error && (
             <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-sm font-semibold text-[#697161]">
               <p>{error}</p>
               <p className="text-xs font-medium text-[#8a8f82]">
-                백엔드 주소, CORS, 테스트 데이터를 확인해 주세요.
+                백엔드 주소, CORS, 로그인 정보를 확인해 주세요.
               </p>
             </div>
           )}
@@ -123,7 +152,6 @@ export const MapPage = () => {
             </div>
           )}
 
-          {/* 영수증 인증 버튼 */}
           <button
             type="button"
             onClick={() => navigate("/receipt")}
