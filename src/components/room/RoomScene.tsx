@@ -1,6 +1,6 @@
 import { useRef } from "react";
-import { ROOM } from "@/types/room";
-import type { Placement } from "@/types/room";
+import { ROOM } from "@/types/Room";
+import type { Placement } from "@/types/Room";
 import { PlacedSprite } from "@/components/room/PlacedSprite";
 import roomBg from "@/assets/home/roomscene.png";
 

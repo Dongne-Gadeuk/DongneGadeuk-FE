@@ -1,6 +1,6 @@
 import { useRef } from "react";
-import { ROOM, BASE_ITEM_W } from "@/types/room";
-import type { Placement } from "@/types/room";
+import { ROOM, BASE_ITEM_W } from "@/types/Room";
+import type { Placement } from "@/types/Room";
 
 interface PlacedSpriteProps {
   p: Placement;

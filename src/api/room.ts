@@ -1,5 +1,5 @@
 import { client } from "@/api/client";
-import type { OwnedItem, Placement, PlacementInput, SavePayload, SaveResult } from "@/types/room";
+import type { OwnedItem, Placement, PlacementInput, SavePayload, SaveResult } from "@/types/Room";
 
 // ===== 서버 DTO 모양 (백엔드 record 와 1:1) =====
 interface OwnedItemResponseDTO {

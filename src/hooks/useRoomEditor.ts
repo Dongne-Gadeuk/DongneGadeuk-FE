@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
-import type { OwnedItem, Placement, PlacementInput, SavePayload, SaveResult } from "@/types/room";
-import { ROOM } from "@/types/room";
+import type { OwnedItem, Placement, PlacementInput, SavePayload, SaveResult } from "@/types/Room";
+import { ROOM } from "@/types/Room";
 
 export type RoomMode = "view" | "edit";
 

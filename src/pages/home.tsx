@@ -3,10 +3,10 @@ import { Header } from "@/components/common/Header";
 import { BottomBar } from "@/components/common/BottomBar";
 import { RoomScene } from "@/components/room/RoomScene";
 import { ItemSheet } from "@/components/room/ItemSheet";
-import { EditToolbar } from "@/components/room/EditToolbar";
+import { EditToolbar } from "@/components/room/Edittoolbar";
 import { useRoomEditor } from "@/hooks/useRoomEditor";
 import { fetchOwnedItems, fetchRoom, syncRoom } from "@/api/room";
-import type { OwnedItem, Placement } from "@/types/room";
+import type { OwnedItem, Placement } from "@/types/Room";
 
 export const HomePage = () => {
   const [owned, setOwned] = useState<OwnedItem[] | null>(null);

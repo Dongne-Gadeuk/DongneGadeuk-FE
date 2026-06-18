@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import type { OwnedItem } from "@/types/room";
+import type { OwnedItem } from "@/types/Room";
 
 interface ItemSheetProps {
   items: OwnedItem[];
