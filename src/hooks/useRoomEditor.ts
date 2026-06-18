@@ -20,6 +20,7 @@ export function useRoomEditor({ initialOwned, initialPlaced, onSave }: UseRoomEd
   const [placed, setPlaced] = useState<Placement[]>(initialPlaced);
   const [selectedUid, setSelectedUid] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // 편집 진입 시점 스냅샷 = diff 의 "원본". (취소 시 복구에도 사용)
   const [snap, setSnap] = useState<Placement[]>(initialPlaced);
@@ -102,15 +103,17 @@ export function useRoomEditor({ initialOwned, initialPlaced, onSave }: UseRoomEd
     [bringToFront],
   );
 
-  // 삭제: 방 목록에서 제거 + 보유 목록 place=false 복귀 (삭제 판정은 저장 시 diff 가 함)
   const removeSelected = useCallback(() => {
-    setPlaced((prev) => {
-      const t = prev.find((p) => p.uid === selectedUid);
-      if (t) setOwned((o) => o.map((it) => (it.userItemId === t.userItemId ? { ...it, place: false } : it)));
-      return prev.filter((p) => p.uid !== selectedUid);
-    });
-    setSelectedUid(null);
-  }, [selectedUid]);
+  if (!selectedUid) return;
+  const t = placed.find((p) => p.uid === selectedUid);
+  if (!t) return;
+
+  setPlaced((prev) => prev.filter((p) => p.uid !== selectedUid));
+  setOwned((prev) =>
+    prev.map((it) => (it.userItemId === t.userItemId ? { ...it, place: false } : it)),
+  );
+  setSelectedUid(null);
+}, [placed, selectedUid]);
 
   /**
    * 저장 페이로드 = 스냅샷(원본) 대비 diff. uid 를 매칭 키로 사용.
@@ -168,45 +171,33 @@ export function useRoomEditor({ initialOwned, initialPlaced, onSave }: UseRoomEd
   }, [placed, snap]);
 
   const save = useCallback(async () => {
-    const payload = buildPayload();
-    try {
-      setSaving(true);
-      const res = (await onSave?.(payload)) ?? undefined;
-      const idMap = res?.idMap ?? {};
+  const payload = buildPayload();
+  try {
+    setSaving(true);
+    setSaveError(null);                         // 👈 시작 시 클리어
+    const res = (await onSave?.(payload)) ?? undefined;
+    const idMap = res?.idMap ?? {};
 
-      // 신규(added) 항목에 서버 발급 placementId 부여 (tempId == uid 매핑)
-      const committed = placed.map((p) =>
-        p.placementId == null && idMap[p.uid] != null ? { ...p, placementId: idMap[p.uid] } : p,
-      );
+    const committed = placed.map((p) =>
+      p.placementId == null && idMap[p.uid] != null ? { ...p, placementId: idMap[p.uid] } : p,
+    );
 
-      setPlaced(committed);
-      setSnap(committed); // 다음 diff 의 원본 갱신
-      setSelectedUid(null);
-      setMode("view");
-    } finally {
-      setSaving(false);
-    }
-  }, [buildPayload, onSave, placed]);
+    setPlaced(committed);
+    setSnap(committed);
+    setSelectedUid(null);
+    setMode("view");
+  } catch (e) {
+    console.error(e);
+    setSaveError("저장에 실패했어요. 다시 시도해 주세요.");  // 👈 편집 모드 유지
+  } finally {
+    setSaving(false);
+  }
+}, [buildPayload, onSave, placed]);
 
   return {
-    mode,
-    placed,
-    drawOrder,
-    available,
-    selected,
-    selectedUid,
-    saving,
-    enterEdit,
-    cancelEdit,
-    addItem,
-    selectItem,
-    moveTo,
-    setScale,
-    flipLeftRight,
-    flipTopBottom,
-    bringToFront,
-    removeSelected,
-    save,
-    buildPayload, // 디버그/테스트용
-  };
+  mode, placed, drawOrder, available, selected, selectedUid,
+  saving, saveError,                 
+  enterEdit, cancelEdit, addItem, selectItem, moveTo, setScale,
+  flipLeftRight, flipTopBottom, bringToFront, removeSelected, save, buildPayload,
+};
 }

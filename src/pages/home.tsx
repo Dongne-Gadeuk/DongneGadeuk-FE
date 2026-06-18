@@ -62,6 +62,12 @@ function RoomView({ initialOwned, initialPlaced }: { initialOwned: OwnedItem[]; 
       <Header />
 
       <main className="relative flex flex-1 flex-col overflow-hidden">
+        {room.saveError && (
+          <div className="absolute left-1/2 top-3 z-40 -translate-x-1/2 rounded-lg bg-red/90 px-3 py-2 text-[13px] text-white shadow">
+            {room.saveError}
+          </div>
+        )}
+
         {editing && (
           <div className="absolute right-3 top-3 z-30 flex gap-2">
             <button

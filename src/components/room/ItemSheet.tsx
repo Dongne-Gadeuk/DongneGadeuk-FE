@@ -19,25 +19,30 @@ type Info = { item: OwnedItem; left: number; top: number; below: boolean };
 export function ItemSheet({ items, onPick }: ItemSheetProps) {
   const [height, setHeight] = useState(DEFAULT_H);
   const [info, setInfo] = useState<Info | null>(null);
-
   const gridRef = useRef<HTMLDivElement>(null);
-  const drag = useRef<{ y: number; h: number } | null>(null);
+  
   const press = useRef<{ timer: number; moved: boolean; fired: boolean; sx: number; sy: number } | null>(null);
 
   // ----- 시트 높이 조절 (핸들) -----
-  const onDown = (e: React.PointerEvent) => {
-    drag.current = { y: e.clientY, h: height };
-    (e.currentTarget as Element).setPointerCapture(e.pointerId);
-  };
-  const onMove = (e: React.PointerEvent) => {
-    if (!drag.current) return;
-    const dy = drag.current.y - e.clientY;
-    setHeight(Math.min(MAX_H, Math.max(MIN_H, drag.current.h + dy)));
-  };
-  const onUp = (e: React.PointerEvent) => {
-    drag.current = null;
-    (e.currentTarget as Element).releasePointerCapture?.(e.pointerId);
-  };
+ const sheetRef = useRef<HTMLDivElement>(null);
+const drag = useRef<{ y: number; h: number; nh: number } | null>(null);
+
+const onDown = (e: React.PointerEvent) => {
+  drag.current = { y: e.clientY, h: height, nh: height };
+  (e.currentTarget as Element).setPointerCapture(e.pointerId);
+};
+const onMove = (e: React.PointerEvent) => {
+  const d = drag.current;
+  if (!d) return;
+  d.nh = Math.min(MAX_H, Math.max(MIN_H, d.h + (d.y - e.clientY)));
+  if (sheetRef.current) sheetRef.current.style.height = `${d.nh}px`;  // DOM 직접
+};
+const onUp = (e: React.PointerEvent) => {
+  const d = drag.current;
+  drag.current = null;
+  (e.currentTarget as Element).releasePointerCapture?.(e.pointerId);
+  if (d) setHeight(d.nh);   // 끝에 한 번
+};
 
   // ----- 정보 카드 위치 계산 (꾹 눌렀을 때) -----
   const openInfo = (item: OwnedItem, btn: HTMLElement) => {
