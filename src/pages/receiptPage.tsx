@@ -3,6 +3,7 @@ import { BottomBar } from "@/components/common/BottomBar";
 import Webcam from "react-webcam";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "@/api/client";
 
 // data URL -> Blob 변환
 function dataUrlToBlob(dataUrl: string): Blob {
@@ -29,10 +30,7 @@ export const ReceiptPage = () => {
             const form = new FormData();
             form.append("image", dataUrlToBlob(imageSrc), "receipt.jpg");
 
-            const res = await fetch("/api/receipt", {
-                method: "POST",
-                body: form, // Content-Type 직접 설정 X (브라우저가 boundary 자동 처리)
-            });
+            const res = await apiFetch("/api/receipt", { method: "POST", body: form });
             if (!res.ok) throw new Error("처리 실패");
 
             const saved = await res.json();

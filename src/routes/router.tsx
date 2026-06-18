@@ -5,6 +5,9 @@ import { HomePage } from "../pages/home";
 import { ReceiptPage } from "../pages/receiptPage";
 import { MapPage } from "../pages/map";
 import { CollectionPage } from "../pages/collection";
+import { SignupPage } from "../pages/signup";
+import { LoginPage } from "../pages/login";
+
 
 export const router = createBrowserRouter([
   {
@@ -18,12 +21,15 @@ export const router = createBrowserRouter([
           { path: "receipt", element: <ReceiptPage /> },
           { path: "map", element: <MapPage /> },
           { path: "collection", element: <CollectionPage /> },
+          
           // {
           //   path: "login",
           //   element: <LoginPage />,
           // },
         ],
       },
+      { path: "login", element: <LoginPage /> },
+      { path: "signup", element: <SignupPage /> },
     ],
   },
 ]);
