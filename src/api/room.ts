@@ -1,4 +1,4 @@
-import { client } from "@/api/client";
+import { apiJson } from "@/api/client";
 import type { OwnedItem, Placement, PlacementInput, SavePayload, SaveResult } from "@/types/Room";
 
 // ===== 서버 DTO 모양 (백엔드 record 와 1:1) =====
@@ -28,21 +28,21 @@ interface RoomSyncResponseDTO {
 
 // GET /api/me/items
 export async function fetchOwnedItems(): Promise<OwnedItem[]> {
-  const { data } = await client.get<OwnedItemResponseDTO[]>("/api/me/items");
+  const data = await apiJson<OwnedItemResponseDTO[]>("/api/me/items");
   return data.map((d) => ({
     userItemId: d.userItemId,
     itemId: d.itemId,
     itemName: d.itemName,
     imageUrl: d.imageUrl,
     place: d.placed, // placed → place
-    storeName: "기본 상점", 
+    storeName: "기본 상점",
     visitCount: 0,
   }));
 }
 
 // GET /api/me/room
 export async function fetchRoom(): Promise<Placement[]> {
-  const { data } = await client.get<PlacementResponseDTO[]>("/api/me/room");
+  const data = await apiJson<PlacementResponseDTO[]>("/api/me/room");
   return data.map((d) => ({
     uid: `pl-${d.placementId}`, // 서버엔 uid 없으므로 placementId 로 안정적 생성
     placementId: d.placementId,
@@ -79,7 +79,10 @@ export async function syncRoom(payload: SavePayload): Promise<SaveResult> {
     updated: payload.updated.map(toServerInput),
     removedIds: payload.removedIds,
   };
-  const { data } = await client.post<RoomSyncResponseDTO>("/api/me/room/sync", body);
+  const data = await apiJson<RoomSyncResponseDTO>("/api/me/room/sync", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
   // idMap 키 = tempId(=uid) 그대로 → 훅의 commit 로직과 바로 맞물림
   return { idMap: data.idMap ?? {} };
 }

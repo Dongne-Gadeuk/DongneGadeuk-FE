@@ -103,7 +103,7 @@ export function ItemSheet({ items, onPick }: ItemSheetProps) {
         className="sticky top-0 z-10 cursor-row-resize touch-none select-none bg-white px-4 pb-2 pt-2.5"
       >
         <div className="mx-auto mb-2 h-[5px] w-10 rounded-full bg-brown/40" />
-        <span className="text-xs font-bold tracking-wider text-brown">탭하면 배치 · 길게 누르면 정보</span>
+        <span className="text-xs font-bold tracking-wider text-brown">TAP TO ADD</span>
       </div>
 
       <div className="px-4 pb-5">
